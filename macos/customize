@@ -1,0 +1,111 @@
+# --- Appearance ---
+
+# Enable dark mode
+osascript -l JavaScript -e "Application('System Events').appearancePreferences.darkMode = true"
+
+# --- Dock ---
+
+# Enable Dock auto-hide (hides Dock when cursor moves away)
+defaults write com.apple.dock autohide -bool true
+
+# Set Dock icon size to 49 pixels
+defaults write com.apple.dock tilesize -int 49
+
+# --- Window Manager ---
+
+# Hide all windows when clicking the desktop
+defaults write com.apple.WindowManager HideDesktop -bool true
+
+# Remove gaps/margins between tiled windows
+defaults write com.apple.WindowManager EnableTiledWindowMargins -bool false
+
+# Group windows by application in Stage Manager
+defaults write com.apple.WindowManager AppWindowGroupingBehavior -int 1
+
+# Keep widgets hidden on standard desktop
+defaults write com.apple.WindowManager StandardHideWidgets -bool false
+
+# Keep widgets hidden in Stage Manager
+defaults write com.apple.WindowManager StageManagerHideWidgets -bool false
+
+# --- Finder ---
+
+# Show path bar at bottom of Finder windows
+defaults write com.apple.finder ShowPathbar -bool true
+
+# Show status bar in Finder windows
+defaults write com.apple.finder ShowStatusBar -bool true
+
+# Allow text selection in Quick Look
+defaults write com.apple.finder QLEnableTextSelection -bool true
+
+# Display full POSIX path as Finder window title
+defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
+
+# Show hidden files in Finder
+defaults write com.apple.finder AppleShowAllFiles -bool true
+
+# Set Home folder as the default location for new Finder windows
+defaults write com.apple.finder NewWindowTarget 'PfHm'
+defaults write com.apple.finder NewWindowTargetPath "file://$HOME"
+
+# --- NSGlobalDomain (System-wide) ---
+
+# Expand save panel by default
+defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+
+# Expand print panel by default
+defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
+defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
+
+# Save to disk (not iCloud) by default
+defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
+
+# Disable smart quotes (annoying when typing code)
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+
+# Disable smart dashes (annoying when typing code)
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+
+# Display file extensions in all contexts
+defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+
+# Disable "natural" (reverse) scrolling
+defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+
+# --- Keyboard ---
+
+# Faster key repeat rate (lower = faster)
+defaults write -g KeyRepeat -int 1
+
+# Shorter delay before key repeat starts (lower = shorter)
+defaults write -g InitialKeyRepeat -int 20
+
+# --- Input & Menu Bar ---
+
+# Hide Text Input menu (US flag icon) from menu bar
+defaults write com.apple.TextInputMenu visible -bool false
+
+# Show remaining battery percentage in menu bar
+defaults write com.apple.menuextra.battery ShowPercent -string "YES"
+
+# --- Sound ---
+
+# Disable UI sound effects (empty trash, screenshot, etc.)
+defaults write com.apple.systemsound "com.apple.sound.uiaudio.enabled" -int 0
+
+# --- LaunchServices ---
+
+# Disable "Are you sure you want to open?" quarantine dialog for downloaded apps
+defaults write com.apple.LaunchServices LSQuarantine -bool false
+
+# --- Printing ---
+
+# Automatically quit printer app once print jobs complete
+defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
+
+# --- Apply Changes ---
+
+# Restart Dock and Finder to apply changes
+killall Dock && killall Finder
