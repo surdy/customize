@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# 1. Define the list of GNU utilities
+# Note: mapped generic names to specific Homebrew package names
+PACKAGES=(
+    "coreutils"
+    "findutils"
+    "gnu-sed"
+    "gawk"
+    "gnu-tar"
+    "grep"
+    "curl"
+    "make"
+    "gnu-which"
+    "openssh"
+    "bash"
+    "less"
+    "gzip"
+)
+
+# 2. Check if Homebrew is installed
+if ! command -v brew &> /dev/null; then
+    echo "Homebrew is not installed. Please install it first."
+    exit 1
+fi
+
+echo "--- Updating Homebrew ---"
+brew update
+
+echo "--- Installing GNU Utilities ---"
+for pkg in "${PACKAGES[@]}"; do
+    if brew list "$pkg" &> /dev/null; then
+        echo "$pkg is already installed. Upgrading..."
+        brew upgrade "$pkg" 2>/dev/null || echo "$pkg is up to date."
+    else
+        echo "Installing $pkg..."
+        brew install "$pkg"
+    fi
+done
+
+# 3. Configure PATH and MANPATH
+# We need to find the 'libexec/gnubin' folders for these packages
+# to force the system to use 'ls' instead of 'gls', etc.
+
+SHELL_CONFIG="$HOME/.bash_profile"
+# Create file if it doesn't exist
+touch "$SHELL_CONFIG"
+
+echo "" >> "$SHELL_CONFIG"
+echo "# --- GNU Utilities Setup (Added by script) ---" >> "$SHELL_CONFIG"
+
+echo "Configuring PATHs in $SHELL_CONFIG..."
+
+# List of packages that use the 'libexec/gnubin' convention for default names
+GNU_PATH_PKGS=("coreutils" "findutils" "gnu-sed" "gnu-tar" "grep" "make" "gnu-which")
+
+for pkg in "${GNU_PATH_PKGS[@]}"; do
+    PREFIX=$(brew --prefix "$pkg")
+    if [ -d "$PREFIX/libexec/gnubin" ]; then
+        echo "export PATH=\"$PREFIX/libexec/gnubin:\$PATH\"" >> "$SHELL_CONFIG"
+    fi
+    if [ -d "$PREFIX/libexec/gnuman" ]; then
+        echo "export MANPATH=\"$PREFIX/libexec/gnuman:\$MANPATH\"" >> "$SHELL_CONFIG"
+    fi
+done
+
+# Handle gawk (Standard binary path usually fine, but prioritizing brew bin)
+echo "export PATH=\"$(brew --prefix)/bin:\$PATH\"" >> "$SHELL_CONFIG"
+
+echo "# --- End GNU Utilities Setup ---" >> "$SHELL_CONFIG"
+
+# 4. Set Bash as default shell
+BREW_BASH="$(brew --prefix)/bin/bash"
+
+# Check if the new bash is in /etc/shells
+if ! grep -q "$BREW_BASH" /etc/shells; then
+    echo "Adding Homebrew Bash to /etc/shells (requires sudo)..."
+    echo "$BREW_BASH" | sudo tee -a /etc/shells
+fi
+
+# Change the shell
+if [ "$SHELL" != "$BREW_BASH" ]; then
+    echo "Changing default shell to Homebrew Bash..."
+    chsh -s "$BREW_BASH"
+    echo "Shell changed. Please restart your terminal."
+else
+    echo "Default shell is already Homebrew Bash."
+fi
+
+echo "-----------------------------------------------------"
+echo "Installation complete!"
+echo "Please run 'source $SHELL_CONFIG' or restart your terminal to see changes."
