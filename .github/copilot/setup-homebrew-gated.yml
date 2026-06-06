@@ -1,0 +1,43 @@
+---
+name: setup-homebrew-gated
+description: |
+  Install the Homebrew approval wrapper for a non-admin macOS user.
+  This ensures all mutating brew commands (install, upgrade, uninstall) require
+  explicit user approval — even when agents run in autopilot/YOLO mode.
+steps:
+  - name: Clone customize repo and run setup
+    run: |
+      # Clone or update the customize repo
+      if [ -d "/tmp/customize" ]; then
+        cd /tmp/customize && git pull --quiet
+      else
+        git clone https://github.com/surdy/customize.git /tmp/customize
+      fi
+
+      # Run the setup script
+      /tmp/customize/macos/homebrew-gated/setup.sh
+
+      # Activate in current shell
+      export PATH="$HOME/.local/bin:$PATH"
+
+      # Verify
+      echo ""
+      echo "Verifying installation..."
+      WHICH_BREW="$(which brew)"
+      if [ "$WHICH_BREW" = "$HOME/.local/bin/brew" ]; then
+        echo "✅ Homebrew approval wrapper is active"
+      else
+        echo "⚠️  Wrapper installed but not first in PATH for this shell."
+        echo "   Run: export PATH=\"\$HOME/.local/bin:\$PATH\""
+      fi
+
+      # Check write access
+      BREW_PREFIX="$(/opt/homebrew/bin/brew --prefix 2>/dev/null || echo "/opt/homebrew")"
+      if [ -w "$BREW_PREFIX" ]; then
+        echo "✅ Write access to $BREW_PREFIX confirmed"
+      else
+        echo ""
+        echo "⚠️  No write access to $BREW_PREFIX"
+        echo "   An admin user needs to run:"
+        echo "   sudo /tmp/customize/macos/homebrew-gated/admin-setup.sh $(whoami)"
+      fi
